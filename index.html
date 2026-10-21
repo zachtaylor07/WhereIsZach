@@ -12,6 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -29,25 +30,34 @@
         }
     </script>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen font-sans flex flex-col justify-between">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen font-sans flex flex-col justify-between transition-colors duration-200">
 
     <!-- Top Header / Bar -->
-    <header class="bg-brand-700 text-white shadow-md sticky top-0 z-40">
+    <header class="bg-brand-700 dark:bg-slate-800 text-white shadow-md sticky top-0 z-40 border-b border-brand-800 dark:border-slate-700">
         <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <div class="bg-white/10 p-2 rounded-lg">
+                <div class="bg-white/10 dark:bg-slate-700/50 p-2 rounded-lg">
                     <i class="fa-solid font-bold text-xl text-amber-300 fa-location-dot"></i>
                 </div>
                 <div>
                     <h1 class="font-bold text-lg leading-tight" id="headerName">Staff Finder</h1>
-                    <p class="text-xs text-brand-100" id="headerTitle">School District Staff Tracker</p>
+                    <p class="text-xs text-brand-100 dark:text-slate-300" id="headerTitle">School District Staff Tracker</p>
                 </div>
             </div>
-            <!-- Toggle Admin Mode Button -->
-            <button id="adminToggleBtn" onclick="toggleAdminModal()" class="text-xs bg-brand-900/50 hover:bg-brand-900 text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 border border-brand-500/30">
-                <i class="fa-solid fa-lock"></i>
-                <span id="adminBtnText">Admin Login</span>
-            </button>
+            
+            <div class="flex items-center gap-2">
+                <!-- Dark Mode Toggle Button -->
+                <button id="themeToggleBtn" onclick="toggleDarkMode()" title="Toggle Dark Mode" class="p-2 text-slate-200 hover:text-white bg-brand-900/40 dark:bg-slate-700 hover:bg-brand-900 dark:hover:bg-slate-600 rounded-lg transition-all border border-brand-500/30 dark:border-slate-600">
+                    <i class="fa-solid fa-moon text-sm dark:hidden"></i>
+                    <i class="fa-solid fa-sun text-sm hidden dark:block text-amber-300"></i>
+                </button>
+
+                <!-- Toggle Admin Mode Button -->
+                <button id="adminToggleBtn" onclick="toggleAdminModal()" class="text-xs bg-brand-900/50 hover:bg-brand-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 border border-brand-500/30 dark:border-slate-600 font-medium">
+                    <i class="fa-solid fa-lock"></i>
+                    <span id="adminBtnText">Admin Login</span>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -55,7 +65,7 @@
     <main class="max-w-3xl mx-auto px-4 py-6 w-full flex-grow space-y-6">
 
         <!-- PUBLIC VIEW: Current Status Banner -->
-        <div id="statusCard" class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden transition-all">
+        <div id="statusCard" class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700/80 overflow-hidden transition-all">
             <!-- Header Status Color Bar -->
             <div id="statusBarBg" class="bg-emerald-500 text-white px-6 py-3 flex items-center justify-between transition-colors">
                 <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
@@ -67,72 +77,72 @@
 
             <div class="p-6 md:p-8 space-y-6">
                 <!-- Person Details -->
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-700/60 pb-6">
                     <div>
-                        <span class="text-xs font-semibold text-brand-600 tracking-wide uppercase" id="displayDept">District Support</span>
-                        <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900" id="displayName">Alex Morgan</h2>
-                        <p class="text-sm text-slate-500" id="displayRole">IT Specialist & Tech Coordinator</p>
+                        <span class="text-xs font-semibold text-brand-600 dark:text-brand-500 tracking-wide uppercase" id="displayDept">District Support</span>
+                        <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white" id="displayName">Alex Morgan</h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400" id="displayRole">IT Specialist & Tech Coordinator</p>
                     </div>
-                    <div class="flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100 self-start md:self-auto">
-                        <i class="fa-solid fa-building text-brand-600 text-lg"></i>
+                    <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700 self-start md:self-auto">
+                        <i class="fa-solid fa-building text-brand-600 dark:text-brand-400 text-lg"></i>
                         <div>
-                            <p class="text-xs text-slate-400 font-medium">Home Base</p>
-                            <p class="text-xs font-bold text-slate-700" id="displayBase">Central High School</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-400 font-medium">Home Base</p>
+                            <p class="text-xs font-bold text-slate-700 dark:text-slate-200" id="displayBase">School Board Office (Office)</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Live Location Highlight -->
-                <div class="bg-slate-50 rounded-xl p-5 border border-slate-200/80">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Current Location</p>
+                <div class="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-5 border border-slate-200/80 dark:border-slate-700">
+                    <p class="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wide mb-1">Current Location</p>
                     <div class="flex items-start gap-3">
                         <i class="fa-solid fa-map-pin text-rose-500 text-2xl mt-1"></i>
                         <div>
-                            <h3 class="text-xl font-bold text-slate-800" id="displayCurrentBuilding">Lincoln Elementary School</h3>
-                            <p class="text-sm text-slate-600 font-medium mt-0.5" id="displayCurrentRoom">Room 204 (Computer Lab)</p>
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-white" id="displayCurrentBuilding">Gainesville High School</h3>
+                            <p class="text-sm text-slate-600 dark:text-slate-300 font-medium mt-0.5" id="displayCurrentRoom">Room 204 (Computer Lab)</p>
                         </div>
                     </div>
 
                     <!-- Custom Note -->
-                    <div id="noteContainer" class="mt-4 pt-3 border-t border-slate-200/60 flex items-start gap-2 text-slate-600 text-sm">
+                    <div id="noteContainer" class="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-600/60 flex items-start gap-2 text-slate-600 dark:text-slate-300 text-sm">
                         <i class="fa-solid fa-circle-info text-brand-500 mt-0.5"></i>
                         <p class="italic" id="displayNote">"Testing network cabling until 2:00 PM. Feel free to text me if urgent."</p>
                     </div>
                 </div>
 
                 <!-- Expected Return / Schedule info -->
-                <div id="expectedReturnContainer" class="hidden bg-amber-50 border border-amber-200 text-amber-800 text-sm p-3 rounded-xl flex items-center gap-2">
-                    <i class="fa-solid fa-clock text-amber-600"></i>
+                <div id="expectedReturnContainer" class="hidden bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-200 text-sm p-3 rounded-xl flex items-center gap-2">
+                    <i class="fa-solid fa-clock text-amber-600 dark:text-amber-400"></i>
                     <span>Expected back at home base: <strong id="displayReturnTime">2:30 PM</strong></span>
                 </div>
             </div>
         </div>
 
         <!-- PUBLIC VIEW: Direct Contact Actions -->
-        <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 space-y-4">
-            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                <i class="fa-solid fa-paper-plane text-brand-600"></i>
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700/80 p-6 space-y-4">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="fa-solid fa-paper-plane text-brand-600 dark:text-brand-400"></i>
                 Contact Me Directly
             </h3>
-            <p class="text-xs text-slate-500">Choose your preferred method to send a message or call directly from your device.</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Choose your preferred method to send a message or call directly from your device.</p>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                 <!-- Text Message (SMS) -->
-                <a id="smsBtn" href="sms:5551234567" class="flex flex-col items-center justify-center p-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl border border-emerald-200/80 transition-all group text-center">
+                <a id="smsBtn" href="sms:5551234567" class="flex flex-col items-center justify-center p-4 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 rounded-xl border border-emerald-200/80 dark:border-emerald-800/60 transition-all group text-center">
                     <i class="fa-solid fa-comment-sms text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
                     <span class="font-bold text-sm">Send SMS Text</span>
                     <span class="text-[10px] opacity-75 mt-0.5">Work Phone</span>
                 </a>
 
                 <!-- Phone Call -->
-                <a id="callBtn" href="tel:5551234567" class="flex flex-col items-center justify-center p-4 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl border border-blue-200/80 transition-all group text-center">
+                <a id="callBtn" href="tel:5551234567" class="flex flex-col items-center justify-center p-4 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-xl border border-blue-200/80 dark:border-blue-800/60 transition-all group text-center">
                     <i class="fa-solid fa-phone text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
                     <span class="font-bold text-sm">Call Work Phone</span>
                     <span class="text-[10px] opacity-75 mt-0.5" id="displayPhone">Ext. 4412</span>
                 </a>
 
                 <!-- Email Direct -->
-                <a id="emailBtn" href="mailto:alex.morgan@district.edu" class="flex flex-col items-center justify-center p-4 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl border border-purple-200/80 transition-all group text-center">
+                <a id="emailBtn" href="mailto:alex.morgan@district.edu" class="flex flex-col items-center justify-center p-4 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-xl border border-purple-200/80 dark:border-purple-800/60 transition-all group text-center">
                     <i class="fa-solid fa-envelope text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
                     <span class="font-bold text-sm">Send Email</span>
                     <span class="text-[10px] opacity-75 mt-0.5" id="displayEmail">alex@district.edu</span>
@@ -176,15 +186,20 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Building Location</label>
-                        <input type="text" id="editBuilding" list="buildingPresets" placeholder="e.g. High School, Admin Office" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none" required>
-                        <datalist id="buildingPresets">
-                            <option value="District Central Office">
-                            <option value="High School">
-                            <option value="Middle School">
-                            <option value="Lincoln Elementary">
-                            <option value="Washington Elementary">
-                            <option value="Maintenance & Transportation Depot">
-                        </datalist>
+                        <select id="editBuilding" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none" required>
+                            <option value="School Board Office (Office)">School Board Office (Office)</option>
+                            <option value="Horizon Academy">Horizon Academy</option>
+                            <option value="Gainesville High School">Gainesville High School</option>
+                            <option value="Gainesville Middle School - East">Gainesville Middle School - East</option>
+                            <option value="Gainesville Middle School - West">Gainesville Middle School - West</option>
+                            <option value="Enota Multiple Intelligences Academy">Enota Multiple Intelligences Academy</option>
+                            <option value="Mundy Mill Arts Academy">Mundy Mill Arts Academy</option>
+                            <option value="Fair Street International Academy">Fair Street International Academy</option>
+                            <option value="Centennial Arts Academy">Centennial Arts Academy</option>
+                            <option value="Gainesville Exploration Academy">Gainesville Exploration Academy</option>
+                            <option value="New Holland Leadership Academy">New Holland Leadership Academy</option>
+                            <option value="Out of Office">Out of Office</option>
+                        </select>
                     </div>
                 </div>
 
@@ -229,7 +244,20 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Home Base / Office</label>
-                        <input type="text" id="editBase" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none">
+                        <select id="editBase" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none">
+                            <option value="School Board Office (Office)">School Board Office (Office)</option>
+                            <option value="Horizon Academy">Horizon Academy</option>
+                            <option value="Gainesville High School">Gainesville High School</option>
+                            <option value="Gainesville Middle School - East">Gainesville Middle School - East</option>
+                            <option value="Gainesville Middle School - West">Gainesville Middle School - West</option>
+                            <option value="Enota Multiple Intelligences Academy">Enota Multiple Intelligences Academy</option>
+                            <option value="Mundy Mill Arts Academy">Mundy Mill Arts Academy</option>
+                            <option value="Fair Street International Academy">Fair Street International Academy</option>
+                            <option value="Centennial Arts Academy">Centennial Arts Academy</option>
+                            <option value="Gainesville Exploration Academy">Gainesville Exploration Academy</option>
+                            <option value="New Holland Leadership Academy">New Holland Leadership Academy</option>
+                            <option value="Out of Office">Out of Office</option>
+                        </select>
                     </div>
                 </div>
 
@@ -268,7 +296,7 @@
                         <i class="fa-solid fa-download"></i> Save QR Image
                     </button>
                     <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-4 py-2.5 rounded-lg border border-slate-700 flex items-center gap-2">
-                        <i class="fa-solid fa-print"></i> Print Poster
+                        <i class="fa-solid fa-print"></i> Print Door Poster
                     </button>
                 </div>
             </div>
@@ -277,24 +305,24 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-slate-100 border-t border-slate-200 py-4 text-center text-xs text-slate-500">
-        <p>School District Location Tracker &bull; Responsive Mobile Visitors Portal</p>
+    <footer class="bg-slate-100 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 py-4 text-center text-xs text-slate-500 dark:text-slate-400">
+        <p>Gainesville City School District Staff Tracker &bull; Visitor Portal</p>
     </footer>
 
     <!-- PASSCODE MODAL -->
     <div id="passcodeModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xs space-y-4 text-center">
-            <div class="w-12 h-12 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center mx-auto text-xl">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-xs space-y-4 text-center border border-slate-100 dark:border-slate-700">
+            <div class="w-12 h-12 bg-brand-100 dark:bg-slate-700 text-brand-600 dark:text-brand-400 rounded-full flex items-center justify-center mx-auto text-xl">
                 <i class="fa-solid fa-key"></i>
             </div>
             <div>
-                <h3 class="font-bold text-slate-800">Admin Access</h3>
-                <p class="text-xs text-slate-500">Enter passcode to edit your location</p>
+                <h3 class="font-bold text-slate-800 dark:text-white">Admin Access</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Enter passcode to edit your location</p>
             </div>
-            <input type="password" id="passcodeInput" placeholder="Passcode (Default: 1234)" class="w-full text-center border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+            <input type="password" id="passcodeInput" placeholder="Passcode (Default: 1234)" class="w-full text-center border border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
             <div id="passcodeError" class="text-xs text-rose-500 hidden font-semibold">Incorrect Passcode</div>
             <div class="flex gap-2">
-                <button onclick="closePasscodeModal()" class="w-1/2 bg-slate-100 text-slate-600 font-semibold text-xs py-2.5 rounded-lg">Cancel</button>
+                <button onclick="closePasscodeModal()" class="w-1/2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 font-semibold text-xs py-2.5 rounded-lg">Cancel</button>
                 <button onclick="verifyPasscode()" class="w-1/2 bg-brand-600 text-white font-semibold text-xs py-2.5 rounded-lg">Login</button>
             </div>
         </div>
@@ -306,10 +334,10 @@
             name: "Alex Morgan",
             role: "Technology Specialist",
             dept: "District IT Services",
-            base: "High School Central Office",
+            base: "School Board Office (Office)",
             phone: "5550192834",
-            email: "amorgan@district.edu",
-            building: "Lincoln Elementary School",
+            email: "amorgan@gainesville.k12.ga.us",
+            building: "Gainesville High School",
             room: "Room 104 (Media Center)",
             status: "Available / On Site",
             note: "Installing new interactive display boards. Feel free to text me if needed.",
@@ -323,10 +351,26 @@
 
         // On Load
         window.onload = function() {
+            initTheme();
             loadState();
             renderData();
             initQRCode();
         };
+
+        // Theme Toggle Functionality
+        function initTheme() {
+            const savedTheme = localStorage.getItem("district_tracker_theme");
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem("district_tracker_theme", isDark ? 'dark' : 'light');
+        }
 
         // Load data from LocalStorage
         function loadState() {
