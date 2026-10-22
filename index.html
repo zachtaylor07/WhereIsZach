@@ -1,564 +1,1498 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>District Location Tracker & Messenger</title>
-    <!-- Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- QR Code Generator Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f7ff',
-                            100: '#e0effe',
-                            500: '#0284c7',
-                            600: '#0369a1',
-                            700: '#075985',
-                            900: '#0c4a6e'
-                        }
-                    }
-                }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pulse Check | Gainesville City School System</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <!-- QRCode.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            gcss: {
+              navy: '#0B2240',
+              navyDark: '#061325',
+              navyLight: '#16355C',
+              red: '#B91C1C',
+              redDark: '#991B1B',
+              gold: '#D97706',
+              bgLight: '#F8FAFC',
+              cardLight: '#FFFFFF'
             }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            display: ['Outfit', 'sans-serif']
+          }
         }
-    </script>
+      }
+    }
+  </script>
+  
+  <style>
+    :focus-visible {
+      outline: 3px solid #B91C1C;
+      outline-offset: 3px;
+    }
+    .dark :focus-visible {
+      outline: 3px solid #60A5FA;
+      outline-offset: 3px;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+    @keyframes radarPulse {
+      0% { transform: scale(0.95); opacity: 0.9; }
+      50% { transform: scale(1.15); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.9; }
+    }
+    .pulse-radar {
+      animation: radarPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen font-sans flex flex-col justify-between transition-colors duration-200">
+<body class="bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-200 antialiased selection:bg-red-500 selection:text-white">
 
-    <!-- Top Header / Bar -->
-    <header class="bg-brand-700 dark:bg-slate-800 text-white shadow-md sticky top-0 z-40 border-b border-brand-800 dark:border-slate-700">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white/10 dark:bg-slate-700/50 p-2 rounded-lg">
-                    <i class="fa-solid font-bold text-xl text-amber-300 fa-location-dot"></i>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight" id="headerName">Staff Finder</h1>
-                    <p class="text-xs text-brand-100 dark:text-slate-300" id="headerTitle">School District Staff Tracker</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-2">
-                <!-- Dark Mode Toggle Button -->
-                <button id="themeToggleBtn" onclick="toggleDarkMode()" title="Toggle Dark Mode" class="p-2 text-slate-200 hover:text-white bg-brand-900/40 dark:bg-slate-700 hover:bg-brand-900 dark:hover:bg-slate-600 rounded-lg transition-all border border-brand-500/30 dark:border-slate-600">
-                    <i class="fa-solid fa-moon text-sm dark:hidden"></i>
-                    <i class="fa-solid fa-sun text-sm hidden dark:block text-amber-300"></i>
-                </button>
+  <!-- Accessible Skip Link -->
+  <a href="#mainContent" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-gcss-navy focus:text-white focus:rounded-xl focus:shadow-2xl focus:font-bold">
+    Skip to main beacon content
+  </a>
 
-                <!-- Toggle Admin Mode Button -->
-                <button id="adminToggleBtn" onclick="toggleAdminModal()" class="text-xs bg-brand-900/50 hover:bg-brand-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 border border-brand-500/30 dark:border-slate-600 font-medium">
-                    <i class="fa-solid fa-lock"></i>
-                    <span id="adminBtnText">Admin Login</span>
-                </button>
-            </div>
+  <!-- ARIA Live Announcer -->
+  <div id="ariaLiveAnnouncer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Header / Navigation Bar -->
+  <header class="bg-gcss-navy text-white shadow-lg sticky top-0 z-40 border-b border-gcss-navyLight" role="banner">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      
+      <!-- Brand & District Tag -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gcss-red flex items-center justify-center text-white font-extrabold text-xl shadow-md border border-white/20 tracking-tighter" aria-hidden="true">
+          <i class="fa-solid fa-heart-pulse text-lg"></i>
         </div>
-    </header>
-
-    <!-- MAIN CONTAINER -->
-    <main class="max-w-3xl mx-auto px-4 py-6 w-full flex-grow space-y-6">
-
-        <!-- PUBLIC VIEW: Current Status Banner -->
-        <div id="statusCard" class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700/80 overflow-hidden transition-all">
-            <!-- Header Status Color Bar -->
-            <div id="statusBarBg" class="bg-emerald-500 text-white px-6 py-3 flex items-center justify-between transition-colors">
-                <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-                    <span id="statusIndicatorDot" class="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
-                    <span id="statusText">Available / On Site</span>
-                </span>
-                <span class="text-xs opacity-80" id="lastUpdatedText">Updated just now</span>
-            </div>
-
-            <div class="p-6 md:p-8 space-y-6">
-                <!-- Person Details -->
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-700/60 pb-6">
-                    <div>
-                        <span class="text-xs font-semibold text-brand-600 dark:text-brand-500 tracking-wide uppercase" id="displayDept">District Support</span>
-                        <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white" id="displayName">Alex Morgan</h2>
-                        <p class="text-sm text-slate-500 dark:text-slate-400" id="displayRole">IT Specialist & Tech Coordinator</p>
-                    </div>
-                    <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700 self-start md:self-auto">
-                        <i class="fa-solid fa-building text-brand-600 dark:text-brand-400 text-lg"></i>
-                        <div>
-                            <p class="text-xs text-slate-400 dark:text-slate-400 font-medium">Home Base</p>
-                            <p class="text-xs font-bold text-slate-700 dark:text-slate-200" id="displayBase">School Board Office (Office)</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Live Location Highlight -->
-                <div class="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-5 border border-slate-200/80 dark:border-slate-700">
-                    <p class="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wide mb-1">Current Location</p>
-                    <div class="flex items-start gap-3">
-                        <i class="fa-solid fa-map-pin text-rose-500 text-2xl mt-1"></i>
-                        <div>
-                            <h3 class="text-xl font-bold text-slate-800 dark:text-white" id="displayCurrentBuilding">Gainesville High School</h3>
-                            <p class="text-sm text-slate-600 dark:text-slate-300 font-medium mt-0.5" id="displayCurrentRoom">Room 204 (Computer Lab)</p>
-                        </div>
-                    </div>
-
-                    <!-- Custom Note -->
-                    <div id="noteContainer" class="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-600/60 flex items-start gap-2 text-slate-600 dark:text-slate-300 text-sm">
-                        <i class="fa-solid fa-circle-info text-brand-500 mt-0.5"></i>
-                        <p class="italic" id="displayNote">"Testing network cabling until 2:00 PM. Feel free to text me if urgent."</p>
-                    </div>
-                </div>
-
-                <!-- Expected Return / Schedule info -->
-                <div id="expectedReturnContainer" class="hidden bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-200 text-sm p-3 rounded-xl flex items-center gap-2">
-                    <i class="fa-solid fa-clock text-amber-600 dark:text-amber-400"></i>
-                    <span>Expected back at home base: <strong id="displayReturnTime">2:30 PM</strong></span>
-                </div>
-            </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-base sm:text-lg font-bold font-display tracking-tight leading-tight">Pulse Check</span>
+            <span id="navAdminStatus" class="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+              <i class="fa-solid fa-lock text-[10px]" id="navLockIcon"></i>
+              <span id="navLockLabel">Locked</span>
+            </span>
+          </div>
+          <p class="text-xs text-slate-300 font-medium leading-none">Red Elephant Availability Hub &bull; Gainesville, GA</p>
         </div>
+      </div>
+      
+      <!-- Header Controls -->
+      <nav class="flex items-center gap-2" aria-label="Controls">
+        <!-- Theme Toggle -->
+        <button 
+          id="themeToggleBtn" 
+          onclick="toggleDarkMode()" 
+          class="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition text-xs font-semibold border border-white/10 flex items-center gap-1.5 text-white"
+          aria-label="Switch between dark and light mode"
+          title="Toggle Light/Dark Theme">
+          <i id="themeToggleIcon" class="fa-solid fa-moon"></i>
+          <span class="hidden md:inline" id="themeToggleText">Theme</span>
+        </button>
 
-        <!-- PUBLIC VIEW: Direct Contact Actions -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700/80 p-6 space-y-4">
-            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <i class="fa-solid fa-paper-plane text-brand-600 dark:text-brand-400"></i>
-                Contact Me Directly
-            </h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Choose your preferred method to send a message or call directly from your device.</p>
+        <!-- Admin Access Button -->
+        <button 
+          id="adminActionBtn" 
+          onclick="handleAdminButtonClick()" 
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition text-xs font-bold border border-white/10 text-white"
+          aria-label="Unlock administrator settings">
+          <i id="adminActionIcon" class="fa-solid fa-lock"></i>
+          <span id="adminActionText">Admin</span>
+        </button>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                <!-- Text Message (SMS) -->
-                <a id="smsBtn" href="sms:5551234567" class="flex flex-col items-center justify-center p-4 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 rounded-xl border border-emerald-200/80 dark:border-emerald-800/60 transition-all group text-center">
-                    <i class="fa-solid fa-comment-sms text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
-                    <span class="font-bold text-sm">Send SMS Text</span>
-                    <span class="text-[10px] opacity-75 mt-0.5">Work Phone</span>
-                </a>
+        <!-- QR Share Button -->
+        <button 
+          onclick="openShareModal()" 
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gcss-red hover:bg-gcss-redDark active:scale-95 transition text-xs font-bold text-white shadow-sm border border-red-400/40"
+          aria-label="Share or display QR code">
+          <i class="fa-solid fa-qrcode"></i>
+          <span class="hidden sm:inline">Share QR</span>
+        </button>
+      </nav>
+    </div>
+  </header>
 
-                <!-- Phone Call -->
-                <a id="callBtn" href="tel:5551234567" class="flex flex-col items-center justify-center p-4 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-xl border border-blue-200/80 dark:border-blue-800/60 transition-all group text-center">
-                    <i class="fa-solid fa-phone text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
-                    <span class="font-bold text-sm">Call Work Phone</span>
-                    <span class="text-[10px] opacity-75 mt-0.5" id="displayPhone">Ext. 4412</span>
-                </a>
+  <!-- Live Toast Alert for Feedback -->
+  <div id="toastNotification" role="alert" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 transform opacity-0 pointer-events-none -translate-y-4">
+    <div class="bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs sm:text-sm font-bold px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 border border-slate-700 dark:border-slate-300">
+      <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 dark:text-emerald-600" aria-hidden="true"></i>
+      <span id="toastMessage">Beacon updated</span>
+    </div>
+  </div>
 
-                <!-- Email Direct -->
-                <a id="emailBtn" href="mailto:alex.morgan@district.edu" class="flex flex-col items-center justify-center p-4 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-xl border border-purple-200/80 dark:border-purple-800/60 transition-all group text-center">
-                    <i class="fa-solid fa-envelope text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
-                    <span class="font-bold text-sm">Send Email</span>
-                    <span class="text-[10px] opacity-75 mt-0.5" id="displayEmail">alex@district.edu</span>
-                </a>
-            </div>
+  <!-- Main Beacon Dashboard -->
+  <main id="mainContent" class="flex-1 max-w-3xl w-full mx-auto p-4 sm:p-6 space-y-5">
+
+    <!-- Admin Status Banner (shown only when unlocked) -->
+    <div id="adminNoticeBar" class="hidden bg-amber-500/10 border-2 border-amber-500/40 text-amber-900 dark:text-amber-200 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
+      <div class="flex items-center gap-2.5 font-medium">
+        <div class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold">
+          <i class="fa-solid fa-unlock-keyhole text-xs"></i>
         </div>
-
-        <!-- ADMIN VIEW: Edit & Configuration Section (Hidden by Default) -->
-        <div id="adminPanel" class="hidden bg-slate-900 text-slate-100 rounded-2xl shadow-2xl p-6 md:p-8 space-y-6 border border-slate-700">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
-                <div>
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-sliders text-brand-500"></i> Admin Management Control
-                    </h2>
-                    <p class="text-xs text-slate-400">Update your current location or edit account contact details.</p>
-                </div>
-                <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-white text-sm bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700">
-                    Exit Admin
-                </button>
-            </div>
-
-            <!-- Tab Navigation inside Admin -->
-            <div class="flex gap-2 border-b border-slate-800 pb-2">
-                <button onclick="switchAdminTab('locationTab')" id="tabBtn-locationTab" class="px-4 py-2 rounded-lg text-sm font-semibold bg-brand-600 text-white">Quick Location Update</button>
-                <button onclick="switchAdminTab('profileTab')" id="tabBtn-profileTab" class="px-4 py-2 rounded-lg text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">Profile & Info</button>
-                <button onclick="switchAdminTab('qrTab')" id="tabBtn-qrTab" class="px-4 py-2 rounded-lg text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">Get QR Code</button>
-            </div>
-
-            <!-- TAB 1: QUICK LOCATION UPDATE -->
-            <form id="locationForm" onsubmit="saveLocation(event)" class="space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Status Availability</label>
-                        <select id="editStatus" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none">
-                            <option value="Available / On Site">🟢 Available / On Site</option>
-                            <option value="In a Meeting">🟡 In a Meeting</option>
-                            <option value="Busy / Do Not Disturb">🔴 Busy / Do Not Disturb</option>
-                            <option value="Traveling Between Buildings">🚘 Traveling Between Buildings</option>
-                            <option value="Off Site / Out of District">⚪ Off Site / Out of District</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Building Location</label>
-                        <select id="editBuilding" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none" required>
-                            <option value="School Board Office (Office)">School Board Office (Office)</option>
-                            <option value="Horizon Academy">Horizon Academy</option>
-                            <option value="Gainesville High School">Gainesville High School</option>
-                            <option value="Gainesville Middle School - East">Gainesville Middle School - East</option>
-                            <option value="Gainesville Middle School - West">Gainesville Middle School - West</option>
-                            <option value="Enota Multiple Intelligences Academy">Enota Multiple Intelligences Academy</option>
-                            <option value="Mundy Mill Arts Academy">Mundy Mill Arts Academy</option>
-                            <option value="Fair Street International Academy">Fair Street International Academy</option>
-                            <option value="Centennial Arts Academy">Centennial Arts Academy</option>
-                            <option value="Gainesville Exploration Academy">Gainesville Exploration Academy</option>
-                            <option value="New Holland Leadership Academy">New Holland Leadership Academy</option>
-                            <option value="Out of Office">Out of Office</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Room / Specific Spot</label>
-                        <input type="text" id="editRoom" placeholder="e.g. Room 102, Main Gym, Library" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Expected Return Time (Optional)</label>
-                        <input type="text" id="editReturn" placeholder="e.g. 2:15 PM" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Short Status Note</label>
-                    <input type="text" id="editNote" placeholder="e.g. Fixing smartboards in wing B" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none">
-                </div>
-
-                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-floppy-disk"></i> Broadcast Updated Location
-                </button>
-            </form>
-
-            <!-- TAB 2: PROFILE & CONTACT DETAILS -->
-            <form id="profileForm" onsubmit="saveProfile(event)" class="hidden space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Your Full Name</label>
-                        <input type="text" id="editName" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Job Title / Role</label>
-                        <input type="text" id="editRole" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Department</label>
-                        <input type="text" id="editDept" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Home Base / Office</label>
-                        <select id="editBase" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none">
-                            <option value="School Board Office (Office)">School Board Office (Office)</option>
-                            <option value="Horizon Academy">Horizon Academy</option>
-                            <option value="Gainesville High School">Gainesville High School</option>
-                            <option value="Gainesville Middle School - East">Gainesville Middle School - East</option>
-                            <option value="Gainesville Middle School - West">Gainesville Middle School - West</option>
-                            <option value="Enota Multiple Intelligences Academy">Enota Multiple Intelligences Academy</option>
-                            <option value="Mundy Mill Arts Academy">Mundy Mill Arts Academy</option>
-                            <option value="Fair Street International Academy">Fair Street International Academy</option>
-                            <option value="Centennial Arts Academy">Centennial Arts Academy</option>
-                            <option value="Gainesville Exploration Academy">Gainesville Exploration Academy</option>
-                            <option value="New Holland Leadership Academy">New Holland Leadership Academy</option>
-                            <option value="Out of Office">Out of Office</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Work Phone Number (For SMS & Calls)</label>
-                        <input type="tel" id="editPhone" placeholder="10-digit phone number" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Work Email</label>
-                        <input type="email" id="editEmail" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none" required>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Admin Passcode</label>
-                    <input type="password" id="editPasscode" placeholder="Change login passcode" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-brand-500 outline-none" required>
-                    <p class="text-[11px] text-slate-400 mt-1">Default code is <code class="bg-slate-700 px-1 py-0.5 rounded text-amber-300">1234</code></p>
-                </div>
-
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-check"></i> Save Profile Details
-                </button>
-            </form>
-
-            <!-- TAB 3: QR CODE GENERATOR -->
-            <div id="qrTab" class="hidden space-y-4 text-center">
-                <p class="text-sm text-slate-300">Print or display this QR code on your door or desk card so visitors can scan and find you anytime.</p>
-                
-                <div class="bg-white p-4 rounded-xl inline-block shadow-lg my-2" id="qrcode"></div>
-                
-                <div class="text-xs text-slate-400 max-w-sm mx-auto truncate" id="qrTargetUrl"></div>
-
-                <div class="flex justify-center gap-3 pt-2">
-                    <button onclick="downloadQR()" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold px-4 py-2.5 rounded-lg flex items-center gap-2">
-                        <i class="fa-solid fa-download"></i> Save QR Image
-                    </button>
-                    <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-4 py-2.5 rounded-lg border border-slate-700 flex items-center gap-2">
-                        <i class="fa-solid fa-print"></i> Print Door Poster
-                    </button>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-slate-100 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 py-4 text-center text-xs text-slate-500 dark:text-slate-400">
-        <p>Gainesville City School District Staff Tracker &bull; Visitor Portal</p>
-    </footer>
-
-    <!-- PASSCODE MODAL -->
-    <div id="passcodeModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-xs space-y-4 text-center border border-slate-100 dark:border-slate-700">
-            <div class="w-12 h-12 bg-brand-100 dark:bg-slate-700 text-brand-600 dark:text-brand-400 rounded-full flex items-center justify-center mx-auto text-xl">
-                <i class="fa-solid fa-key"></i>
-            </div>
-            <div>
-                <h3 class="font-bold text-slate-800 dark:text-white">Admin Access</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Enter passcode to edit your location</p>
-            </div>
-            <input type="password" id="passcodeInput" placeholder="Passcode (Default: 1234)" class="w-full text-center border border-slate-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
-            <div id="passcodeError" class="text-xs text-rose-500 hidden font-semibold">Incorrect Passcode</div>
-            <div class="flex gap-2">
-                <button onclick="closePasscodeModal()" class="w-1/2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 font-semibold text-xs py-2.5 rounded-lg">Cancel</button>
-                <button onclick="verifyPasscode()" class="w-1/2 bg-brand-600 text-white font-semibold text-xs py-2.5 rounded-lg">Login</button>
-            </div>
-        </div>
+        <span><strong>Admin Mode Active:</strong> You can edit your location, activity & departure time.</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="openEditModal()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold shadow-sm transition">
+          <i class="fa-solid fa-sliders mr-1"></i> Update Status
+        </button>
+        <button onclick="lockAdminSession()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold shadow-sm transition">
+          Lock Now
+        </button>
+      </div>
     </div>
 
-    <script>
-        // Initial Default State
-        const defaultState = {
-            name: "Alex Morgan",
-            role: "Technology Specialist",
-            dept: "District IT Services",
-            base: "School Board Office (Office)",
-            phone: "5550192834",
-            email: "amorgan@gainesville.k12.ga.us",
-            building: "Gainesville High School",
-            room: "Room 104 (Media Center)",
-            status: "Available / On Site",
-            note: "Installing new interactive display boards. Feel free to text me if needed.",
-            returnTime: "2:00 PM",
-            lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            passcode: "1234"
-        };
+    <!-- PRIMARY PROFILE IDENTITY CARD (Your Name Is Unambiguously Visible Here) -->
+    <section class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200 dark:border-slate-800" aria-labelledby="staffHeaderName">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800/80 pb-5">
+        <div class="flex items-center gap-4">
+          <!-- Big Initial Avatar -->
+          <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gcss-navy dark:bg-slate-800 text-white flex items-center justify-center text-2xl sm:text-3xl font-display font-extrabold shadow-md border-2 border-slate-200 dark:border-slate-700 shrink-0" id="avatarInitials" aria-hidden="true">
+            GC
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-bold tracking-wider uppercase text-gcss-red dark:text-red-400 bg-red-50 dark:bg-red-950/60 px-2.5 py-0.5 rounded-md border border-red-200 dark:border-red-900/40">
+                Live Pulse Check
+              </span>
+              <span id="roleBadge" class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                Gainesville City Schools
+              </span>
+            </div>
+            <!-- Clean, high-contrast staff name -->
+            <h1 id="staffHeaderName" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-display tracking-tight mt-1 leading-tight">
+              Dr. Marcus Vance
+            </h1>
+            <p id="staffRoleTitle" class="text-sm sm:text-base font-semibold text-slate-600 dark:text-slate-300">
+              Assistant Principal / Instructional Specialist
+            </p>
+          </div>
+        </div>
 
-        let state = { ...defaultState };
-        let isAdminLoggedIn = false;
+        <!-- Quick update trigger for admin -->
+        <div class="flex sm:flex-col items-center sm:items-end justify-between gap-2">
+          <div class="text-left sm:text-right">
+            <span class="text-[11px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500 block">Last Broadcast</span>
+            <span id="lastBroadcastTime" class="text-xs font-bold text-slate-700 dark:text-slate-300">Just now</span>
+          </div>
+          <button 
+            id="quickEditButton" 
+            onclick="handleQuickEditClick()" 
+            class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition flex items-center gap-1.5 border border-slate-200 dark:border-slate-700">
+            <i class="fa-solid fa-pen-to-square text-gcss-red dark:text-red-400"></i>
+            <span>Edit Status</span>
+          </button>
+        </div>
+      </div>
 
-        // On Load
-        window.onload = function() {
-            initTheme();
-            loadState();
-            renderData();
-            initQRCode();
-        };
+      <!-- STATUS & LOCATION CORE DISPLAY -->
+      <div class="pt-5 space-y-4">
+        
+        <!-- 1. What I am doing + Live Status -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Current Activity Card -->
+          <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800">
+            <span class="text-[11px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mb-1.5">
+              <i class="fa-solid fa-briefcase text-gcss-red dark:text-red-400"></i>
+              What I Am Doing Now
+            </span>
+            <div class="flex items-center gap-3">
+              <div id="activityIconWrapper" class="w-10 h-10 rounded-xl bg-red-100 text-gcss-red dark:bg-red-950 dark:text-red-400 flex items-center justify-center text-lg shrink-0">
+                <i id="activityIcon" class="fa-solid fa-chalkboard-user"></i>
+              </div>
+              <div class="min-w-0">
+                <h2 id="activityDisplay" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white truncate leading-tight">
+                  Classroom Walkthroughs & Observations
+                </h2>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span id="availabilityPill" class="inline-flex items-center gap-1.5 text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 pulse-radar" aria-hidden="true"></span>
+                    <span id="availabilityText">Available for Urgent Needs</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        // Theme Toggle Functionality
-        function initTheme() {
-            const savedTheme = localStorage.getItem("district_tracker_theme");
-            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
+          <!-- Time Window / "How Long I Will Be Here" Card -->
+          <div class="p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-800/60">
+            <span class="text-[11px] uppercase tracking-wider font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5 mb-1.5">
+              <i class="fa-regular fa-clock text-amber-600 dark:text-amber-400"></i>
+              How Long I Will Be Here
+            </span>
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs text-slate-600 dark:text-slate-400 font-medium">Stationed until:</p>
+                <div class="flex items-baseline gap-2 mt-0.5">
+                  <h3 id="untilTimeDisplay" class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-display">
+                    2:30 PM
+                  </h3>
+                  <span id="timeRemainingBadge" class="text-xs font-bold px-2 py-0.5 rounded bg-amber-200/80 text-amber-900 dark:bg-amber-900/60 dark:text-amber-200">
+                    ~1 hr remaining
+                  </span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-[11px] text-slate-500 dark:text-slate-400 block font-medium">After this:</span>
+                <span id="nextDestinationDisplay" class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                  GHS Main Office
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Where I Am (GCSS Campus & Specific Room) -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
+          <div class="flex items-start gap-3.5">
+            <div class="w-12 h-12 rounded-xl bg-gcss-navy text-white flex items-center justify-center text-xl shrink-0 shadow-sm mt-0.5">
+              <i class="fa-solid fa-school"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap mb-1">
+                <span id="facilityCategoryBadge" class="text-[11px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200">
+                  High School
+                </span>
+                <span class="text-slate-300 dark:text-slate-600">&bull;</span>
+                <span id="specificRoomBadge" class="text-xs font-bold text-gcss-red dark:text-red-400 bg-red-100/70 dark:bg-red-950/70 border border-red-200 dark:border-red-900 px-2 py-0.5 rounded">
+                  Room 104 (Front Office Wing)
+                </span>
+              </div>
+
+              <!-- Facility Name -->
+              <h2 id="facilityNameDisplay" class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white leading-tight">
+                Gainesville High School
+              </h2>
+              
+              <!-- Address -->
+              <p id="facilityAddressDisplay" class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 flex items-center gap-1.5">
+                <i class="fa-solid fa-location-dot text-slate-400"></i>
+                <span id="addressText">830 Century Place, Gainesville, GA 30501</span>
+              </p>
+
+              <!-- Optional custom note / special announcement -->
+              <div id="statusNoteBox" class="mt-3 p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 text-xs sm:text-sm text-slate-800 dark:text-slate-200 flex items-start gap-2.5">
+                <i class="fa-solid fa-message text-gcss-red dark:text-red-400 mt-0.5 shrink-0"></i>
+                <p id="statusNoteText" class="italic">"If you need me immediately, please call or send a text. I am currently walking halls and observing 3rd period classes."</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Immediate Contact Buttons (WCAG AA High-Contrast Action Bar) -->
+        <div>
+          <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+            <i class="fa-solid fa-address-book"></i>
+            <span>Get In Touch Right Now</span>
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            
+            <!-- Call Action -->
+            <a 
+              id="actionCallBtn" 
+              href="tel:7705364441" 
+              class="flex items-center justify-center gap-2.5 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white font-bold text-sm py-3.5 px-4 rounded-xl shadow transition active:scale-[0.98]">
+              <i class="fa-solid fa-phone text-base"></i>
+              <span>Call Phone</span>
+            </a>
+
+            <!-- SMS Action -->
+            <a 
+              id="actionSmsBtn" 
+              href="sms:7705364441" 
+              class="flex items-center justify-center gap-2.5 bg-blue-700 hover:bg-blue-800 active:bg-blue-900 text-white font-bold text-sm py-3.5 px-4 rounded-xl shadow transition active:scale-[0.98]">
+              <i class="fa-solid fa-comment-sms text-base"></i>
+              <span>Send SMS</span>
+            </a>
+
+            <!-- Email Action -->
+            <a 
+              id="actionEmailBtn" 
+              href="mailto:marcus.vance@gcssk12.net" 
+              class="flex items-center justify-center gap-2.5 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-bold text-sm py-3.5 px-4 rounded-xl shadow transition active:scale-[0.98]">
+              <i class="fa-solid fa-envelope text-base"></i>
+              <span>Send Email</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Facility directions & office contact -->
+        <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-400">
+          <div class="flex items-center gap-1.5">
+            <span>Building Main Line:</span>
+            <strong id="schoolPhoneText" class="text-slate-900 dark:text-white font-semibold">770-536-4441</strong>
+          </div>
+          <a 
+            id="mapsDirectionsLink" 
+            href="https://maps.google.com/?q=830+Century+Place,+Gainesville,+GA+30501" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="text-gcss-red dark:text-red-400 hover:underline font-bold inline-flex items-center gap-1.5">
+            <i class="fa-solid fa-diamond-turn-right"></i>
+            <span>Google Maps Directions</span>
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-slate-500 dark:text-slate-400 pt-4 pb-12 space-y-1">
+      <p>Gainesville City School District &bull; Gainesville, GA</p>
+      <p>Pulse Check &bull; WCAG 2.1 AA Compliant</p>
+    </footer>
+  </main>
+
+  <!-- ======================== MODALS ======================== -->
+
+  <!-- 1. ADMIN PIN AUTHENTICATION MODAL -->
+  <div id="pinModal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="pinModalTitle">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-red-100 text-gcss-red dark:bg-red-950 dark:text-red-400 flex items-center justify-center mx-auto mb-3 text-xl">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <h3 id="pinModalTitle" class="text-lg font-bold text-slate-900 dark:text-white">Admin Security Lock</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">Enter your 4-digit PIN to edit your location, activity, or contact info.</p>
+
+      <form id="pinForm" onsubmit="verifyAdminPin(event)" class="space-y-4">
+        <div>
+          <label for="adminPinInput" class="sr-only">Admin PIN</label>
+          <input 
+            type="password" 
+            id="adminPinInput" 
+            maxlength="8" 
+            inputmode="numeric" 
+            autocomplete="current-password"
+            placeholder="Default: 1234" 
+            required 
+            class="w-full py-2.5 px-4 text-center text-xl tracking-widest font-mono rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gcss-red"
+          />
+          <p id="pinErrorMessage" class="hidden text-xs text-red-600 dark:text-red-400 font-bold mt-1.5" role="alert">
+            Incorrect PIN code. Try again (Default: 1234).
+          </p>
+        </div>
+
+        <div class="flex gap-2">
+          <button 
+            type="button" 
+            onclick="closePinModal()" 
+            class="w-1/2 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition">
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="w-1/2 py-2.5 rounded-xl bg-gcss-red hover:bg-gcss-redDark text-white text-xs font-bold shadow transition">
+            Unlock
+          </button>
+        </div>
+
+        <p class="text-[11px] text-slate-400">Default PIN: <strong class="text-slate-600 dark:text-slate-300 font-mono">1234</strong> (can be changed in settings).</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. EDIT BEACON SETTINGS DRAWER / MODAL -->
+  <div id="editModal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-xl rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto max-h-[94vh] flex flex-col">
+      
+      <!-- Modal Header -->
+      <div class="bg-gcss-navy text-white px-6 py-4 flex items-center justify-between shrink-0 border-b border-gcss-navyLight">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-gcss-red flex items-center justify-center font-bold text-white text-sm">
+            <i class="fa-solid fa-tower-broadcast"></i>
+          </div>
+          <div>
+            <h3 id="editModalTitle" class="font-bold text-base leading-tight">Update Your Live Status</h3>
+            <p class="text-xs text-slate-300">Set where you are, what you are doing, and until when</p>
+          </div>
+        </div>
+        <button 
+          onclick="closeEditModal()" 
+          class="text-slate-300 hover:text-white p-1 rounded-lg hover:bg-white/10 transition"
+          aria-label="Close edit window">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Form Content -->
+      <form id="beaconForm" onsubmit="handleFormSubmit(event)" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs sm:text-sm">
+        
+        <!-- Section 1: Where You Are -->
+        <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 space-y-3">
+          <label class="block text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+            <i class="fa-solid fa-location-dot text-gcss-red dark:text-red-400 mr-1"></i> 1. Where Are You Located?
+          </label>
+
+          <div>
+            <label for="inputSchoolId" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">
+              Select GCSS Campus or District Facility <span class="text-red-500">*</span>
+            </label>
+            <select 
+              id="inputSchoolId" 
+              required
+              class="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-gcss-red">
+              <!-- Populated dynamically with all 12 facilities -->
+            </select>
+          </div>
+
+          <div>
+            <label for="inputRoom" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">
+              Specific Room, Wing, or Area <span class="text-red-500">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="inputRoom" 
+              required
+              placeholder="e.g. Room 104, Media Center, Cafeteria, Gymnasium" 
+              class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gcss-red"
+            />
+          </div>
+        </div>
+
+        <!-- Section 2: What You Are Doing -->
+        <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 space-y-3">
+          <label class="block text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+            <i class="fa-solid fa-briefcase text-gcss-red dark:text-red-400 mr-1"></i> 2. What Are You Doing?
+          </label>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label for="inputActivity" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">
+                Select Activity or Choose Custom <span class="text-red-500">*</span>
+              </label>
+              <select 
+                id="inputActivity" 
+                required
+                onchange="handleActivitySelectChange()"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-gcss-red">
+                <option value="walkthroughs">Classroom Walkthroughs / Observations</option>
+                <option value="meeting">In an IEP, 504, or Admin Meeting</option>
+                <option value="duty">Hallway / Bus / Lunch Duty</option>
+                <option value="office">Front Office / Admin Work</option>
+                <option value="plc">PLC / Grade-Level Collaborative Planning</option>
+                <option value="teaching">Classroom Instruction / Co-Teaching</option>
+                <option value="transit">Traveling Between Campuses</option>
+                <option value="district">Central Office / District Meeting</option>
+                <option value="lunch">Lunch Break</option>
+                <option value="custom">&#x270F;&#xFE0F; Custom Activity (Type your own)...</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="inputAvailability" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">
+                Availability Status <span class="text-red-500">*</span>
+              </label>
+              <select 
+                id="inputAvailability" 
+                required
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-gcss-red">
+                <option value="AVAILABLE">Available & Accessible</option>
+                <option value="URGENT_ONLY">Available for Urgent Needs Only</option>
+                <option value="DO_NOT_DISTURB">Do Not Disturb / In Session</option>
+                <option value="OFF_SITE">Off Site / Traveling</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Free-Form Custom Activity Input -->
+          <div id="customActivityWrapper" class="hidden pt-1">
+            <label for="inputCustomActivity" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">
+              Your Custom Activity / Task <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <input 
+                type="text" 
+                id="inputCustomActivity" 
+                placeholder="e.g. Facilities Walkthrough, State Testing Admin, Parent Conference" 
+                class="w-full pl-9 pr-3 py-2 rounded-xl border border-amber-300 dark:border-amber-600 bg-amber-50/50 dark:bg-amber-950/20 text-slate-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+              <i class="fa-solid fa-pen absolute left-3 top-3 text-amber-600 dark:text-amber-400 text-xs"></i>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">This will display directly on your live card.</p>
+          </div>
+        </div>
+
+        <!-- Section 3: How Long You Will Be There ("Until") -->
+        <div class="bg-amber-500/10 dark:bg-amber-950/20 p-4 rounded-2xl border border-amber-300 dark:border-amber-800/60 space-y-3">
+          <label class="block text-xs font-bold text-amber-900 dark:text-amber-200 uppercase tracking-wider">
+            <i class="fa-regular fa-clock mr-1"></i> 3. How Long Will You Be There?
+          </label>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label for="inputUntilTime" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">
+                Stationed Until (Time) <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="time" 
+                id="inputUntilTime" 
+                required
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-gcss-red"
+              />
+              
+              <!-- Quick Duration Buttons -->
+              <div class="flex items-center gap-1.5 mt-2 flex-wrap">
+                <button type="button" onclick="setQuickTime(30)" class="px-2 py-0.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-bold hover:bg-slate-300">+30m</button>
+                <button type="button" onclick="setQuickTime(60)" class="px-2 py-0.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-bold hover:bg-slate-300">+1 hour</button>
+                <button type="button" onclick="setQuickTime(120)" class="px-2 py-0.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-bold hover:bg-slate-300">+2 hours</button>
+                <button type="button" onclick="setEndOfDay()" class="px-2 py-0.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-bold hover:bg-slate-300">End of Day</button>
+              </div>
+            </div>
+
+            <div>
+              <label for="inputNextDestination" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">
+                Where to Next? (Optional)
+              </label>
+              <input 
+                type="text" 
+                id="inputNextDestination" 
+                placeholder="e.g. Central Office, GHS Main Office, Off Duty" 
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gcss-red"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Live Note -->
+        <div>
+          <label for="inputNote" class="block font-semibold text-slate-700 dark:text-slate-300 text-xs mb-1">
+            Status Note / Message for Visitors (Optional)
+          </label>
+          <textarea 
+            id="inputNote" 
+            rows="2" 
+            placeholder="e.g. Please send a text if urgent; I will check messages between class observations."
+            class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-gcss-red"
+          ></textarea>
+        </div>
+
+        <!-- Section 5: Staff Personal Profile Details (Your Name & Contact) -->
+        <details class="bg-slate-50 dark:bg-slate-800/40 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/60">
+          <summary class="font-bold text-xs text-slate-800 dark:text-slate-200 cursor-pointer select-none">
+            <i class="fa-solid fa-user-gear text-gcss-red dark:text-red-400 mr-1"></i> Edit Your Name, Role & Contact Numbers
+          </summary>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3">
+            <div>
+              <label for="inputName" class="block font-bold text-slate-700 dark:text-slate-300 text-xs mb-1">
+                Your Full Name <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="inputName" 
+                required 
+                placeholder="e.g. Dr. Marcus Vance" 
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-bold"
+              />
+            </div>
+
+            <div>
+              <label for="inputRole" class="block font-bold text-slate-700 dark:text-slate-300 text-xs mb-1">
+                Your Role / Title <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="inputRole" 
+                required 
+                placeholder="e.g. Assistant Principal" 
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label for="inputPhone" class="block font-bold text-slate-700 dark:text-slate-300 text-xs mb-1">
+                Phone Number (Calls & SMS) <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="tel" 
+                id="inputPhone" 
+                required 
+                placeholder="770-536-4441" 
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label for="inputEmail" class="block font-bold text-slate-700 dark:text-slate-300 text-xs mb-1">
+                GCSS Email Address <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="email" 
+                id="inputEmail" 
+                required 
+                placeholder="marcus.vance@gcssk12.net" 
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+              />
+            </div>
+
+            <div class="sm:col-span-2 pt-1 border-t border-slate-200 dark:border-slate-700">
+              <label for="inputChangePin" class="block font-bold text-slate-700 dark:text-slate-300 text-xs mb-1">
+                Change Admin PIN (Leave blank to keep current)
+              </label>
+              <input 
+                type="password" 
+                id="inputChangePin" 
+                maxlength="8" 
+                placeholder="New 4-8 digit PIN" 
+                class="w-full sm:w-48 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-xs"
+              />
+            </div>
+          </div>
+        </details>
+
+        <!-- Actions -->
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+          <button 
+            type="button" 
+            onclick="lockAdminSession()" 
+            class="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-lock"></i>
+            <span>Lock Admin</span>
+          </button>
+
+          <div class="flex items-center gap-2">
+            <button 
+              type="button" 
+              onclick="closeEditModal()" 
+              class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs hover:bg-slate-200 transition">
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              class="px-5 py-2.5 rounded-xl bg-gcss-red hover:bg-gcss-redDark text-white font-bold text-xs shadow-md transition flex items-center gap-1.5">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>Save & Broadcast</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. QR SHARE & PRINT MODAL -->
+  <div id="qrModal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="qrModalTitle">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 text-center">
+      <div class="flex items-center justify-between mb-3">
+        <h3 id="qrModalTitle" class="font-bold text-base text-slate-900 dark:text-white">Share Location QR</h3>
+        <button 
+          onclick="closeShareModal()" 
+          class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+          aria-label="Close dialog">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-600 dark:text-slate-400 mb-4">
+        Post or display this QR code outside your door. Visitors scan it to instantly view your live location, status, and direct contact options.
+      </p>
+
+      <!-- High contrast QR canvas container -->
+      <div class="bg-white p-4 rounded-2xl border-2 border-dashed border-red-300 dark:border-red-900 inline-block shadow-inner mb-3">
+        <div id="qrcodeWrapper" class="flex justify-center items-center w-[180px] h-[180px]"></div>
+      </div>
+
+      <p class="text-xs font-bold text-slate-900 dark:text-white mb-4" id="qrStaffLabel">
+        Dr. Marcus Vance &bull; Pulse Check
+      </p>
+
+      <div class="space-y-2">
+        <button 
+          onclick="copyBeaconLink()" 
+          class="w-full py-2.5 px-4 rounded-xl bg-gcss-navy hover:bg-gcss-navyLight text-white text-xs font-bold transition flex items-center justify-center gap-2">
+          <i class="fa-regular fa-copy"></i>
+          <span id="copyBtnText">Copy Shareable Link</span>
+        </button>
+
+        <button 
+          onclick="window.print()" 
+          class="w-full py-2 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-print"></i>
+          <span>Print Physical Door Badge</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATION LOGIC SCRIPT -->
+  <script>
+    // Full roster of Gainesville City School System (GCSS) locations
+    const GCSS_FACILITIES = [
+      {
+        id: "ghs",
+        name: "Gainesville High School",
+        category: "High School",
+        address: "830 Century Place, Gainesville, GA 30501",
+        phone: "770-536-4441",
+        note: "Grades 9-12 (Home of the Red Elephants)"
+      },
+      {
+        id: "gms_east",
+        name: "Gainesville Middle School East",
+        category: "Middle School",
+        address: "1581 Community Way, Gainesville, GA 30501",
+        phone: "770-534-4237",
+        note: "Grades 6-8 (East Campus)"
+      },
+      {
+        id: "gms_west",
+        name: "Gainesville Middle School West",
+        category: "Middle School",
+        address: "1279 McEver Road SW, Gainesville, GA 30504",
+        phone: "770-532-6250",
+        note: "Grades 6-8 (West Campus)"
+      },
+      {
+        id: "centennial",
+        name: "Centennial Arts Academy",
+        category: "Elementary Academy",
+        address: "852 Century Place, Gainesville, GA 30501",
+        phone: "770-287-2044",
+        note: "Grades PK-5 (Visual & Performing Arts)"
+      },
+      {
+        id: "enota",
+        name: "Enota Multiple Intelligences Academy",
+        category: "Elementary Academy",
+        address: "1340 Enota Avenue NE, Gainesville, GA 30501",
+        phone: "770-532-7711",
+        note: "Grades PK-5 (MI STEAM Focus)"
+      },
+      {
+        id: "fair_street",
+        name: "Fair Street International Academy",
+        category: "Elementary Academy",
+        address: "695 Fair Street, Gainesville, GA 30501",
+        phone: "770-536-5295",
+        note: "Grades PK-5 (IB Primary Years Programme)"
+      },
+      {
+        id: "gea",
+        name: "Gainesville Exploration Academy",
+        category: "Elementary Academy",
+        address: "1145 McEver Road, Gainesville, GA 30504",
+        phone: "770-287-1223",
+        note: "Grades PK-5 (Discovery & Inquiry)"
+      },
+      {
+        id: "mundy_mill",
+        name: "Mundy Mill Academy",
+        category: "Elementary Academy",
+        address: "4260 Millside Parkway, Gainesville, GA 30504",
+        phone: "770-287-2016",
+        note: "Grades PK-5 (Arts & Exploration)"
+      },
+      {
+        id: "new_holland",
+        name: "New Holland Leadership Academy",
+        category: "Elementary Academy",
+        address: "170 Barn Street, Gainesville, GA 30501",
+        phone: "770-287-1095",
+        note: "Grades PK-5 (Leader in Me Focus)"
+      },
+      {
+        id: "horizon_academy",
+        name: "Horizon Academy",
+        category: "Alternative / Student Learning",
+        address: "332 Washington St NW, Gainesville, GA 30501",
+        phone: "770-536-5275",
+        note: "Alternative Learning Academy"
+      },
+      {
+        id: "downtown_office",
+        name: "GCSS Downtown Office",
+        category: "District Administration",
+        address: "332 Washington St NW, Gainesville, GA 30501",
+        phone: "770-536-5275",
+        note: "District Administration & Central Services"
+      },
+      {
+        id: "itsc",
+        name: "Instruction and Technology Support Center",
+        category: "District Support Facility",
+        address: "508 Oak Street NW, Gainesville, GA 30501",
+        phone: "770-536-5275",
+        note: "Instructional Support & District Technology"
+      },
+      {
+        id: "transportation",
+        name: "GCSS Transportation & Fleet Operations",
+        category: "Operations Facility",
+        address: "816 Woods Mill Road, Gainesville, GA 30501",
+        phone: "770-536-8312",
+        note: "District Bus Depot & Facilities"
+      }
+    ];
+
+    // Activity Metadata
+    const ACTIVITY_MAP = {
+      walkthroughs: {
+        title: "Classroom Walkthroughs / Observations",
+        icon: "fa-solid fa-chalkboard-user"
+      },
+      meeting: {
+        title: "In an IEP, 504, or Admin Meeting",
+        icon: "fa-solid fa-users-rectangle"
+      },
+      duty: {
+        title: "Hallway, Bus, or Lunch Duty",
+        icon: "fa-solid fa-person-military-pointing"
+      },
+      office: {
+        title: "Front Office / Admin Desk Work",
+        icon: "fa-solid fa-desktop"
+      },
+      plc: {
+        title: "PLC / Grade-Level Collaborative Planning",
+        icon: "fa-solid fa-comments"
+      },
+      teaching: {
+        title: "Classroom Instruction / Co-Teaching",
+        icon: "fa-solid fa-graduation-cap"
+      },
+      transit: {
+        title: "Traveling Between GCSS Campuses",
+        icon: "fa-solid fa-car-side"
+      },
+      district: {
+        title: "District Office / Board Meeting",
+        icon: "fa-solid fa-building-columns"
+      },
+      lunch: {
+        title: "Lunch / Break",
+        icon: "fa-solid fa-utensils"
+      }
+    };
+
+    const AVAILABILITY_MAP = {
+      AVAILABLE: {
+        text: "Available & Accessible",
+        pillClass: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800",
+        dotClass: "bg-emerald-500"
+      },
+      URGENT_ONLY: {
+        text: "Available for Urgent Needs Only",
+        pillClass: "bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border-amber-300 dark:border-amber-800",
+        dotClass: "bg-amber-500"
+      },
+      DO_NOT_DISTURB: {
+        text: "In Session / Do Not Disturb",
+        pillClass: "bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300 border-rose-300 dark:border-rose-800",
+        dotClass: "bg-rose-500"
+      },
+      OFF_SITE: {
+        text: "Off Site / In Transit",
+        pillClass: "bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700",
+        dotClass: "bg-slate-500"
+      }
+    };
+
+    // State Variables
+    let beaconState = {
+      name: "Dr. Marcus Vance",
+      role: "Assistant Principal",
+      phone: "770-536-4441",
+      email: "marcus.vance@gcssk12.net",
+      schoolId: "ghs",
+      room: "Room 104 (Front Office Wing)",
+      activity: "walkthroughs",
+      customActivityText: "",
+      availability: "AVAILABLE",
+      untilTime: "14:30",
+      nextDestination: "GHS Main Office",
+      note: "If you need me immediately, please call or send a text. I am currently walking halls and observing classes.",
+      updatedAt: "Just now"
+    };
+
+    let appSettings = {
+      adminPin: "1234",
+      isAdminUnlocked: false,
+      isDarkMode: false
+    };
+
+    // Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      initSettings();
+      loadBeaconData();
+      populateSchoolDropdown();
+      renderBeacon();
+      updateAdminUI();
+      // Tick countdown every minute
+      setInterval(updateTimeRemainingBadge, 60000);
+    });
+
+    // Theme handling
+    function initTheme() {
+      const stored = localStorage.getItem('gcss_theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (stored === 'dark' || (!stored && prefersDark)) {
+        document.documentElement.classList.add('dark');
+        appSettings.isDarkMode = true;
+      } else {
+        document.documentElement.classList.remove('dark');
+        appSettings.isDarkMode = false;
+      }
+      updateThemeButtonUI();
+    }
+
+    function toggleDarkMode() {
+      appSettings.isDarkMode = !appSettings.isDarkMode;
+      if (appSettings.isDarkMode) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('gcss_theme', 'dark');
+        announceAria("Dark mode turned on");
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('gcss_theme', 'light');
+        announceAria("Light mode turned on");
+      }
+      updateThemeButtonUI();
+    }
+
+    function updateThemeButtonUI() {
+      const icon = document.getElementById('themeToggleIcon');
+      const text = document.getElementById('themeToggleText');
+      if (appSettings.isDarkMode) {
+        icon.className = "fa-solid fa-sun";
+        text.textContent = "Light";
+      } else {
+        icon.className = "fa-solid fa-moon";
+        text.textContent = "Dark";
+      }
+    }
+
+    // Load admin settings
+    function initSettings() {
+      const savedPin = localStorage.getItem('gcss_beacon_pin');
+      if (savedPin) {
+        appSettings.adminPin = savedPin;
+      }
+    }
+
+    // Load Beacon data from URL params or local storage
+    function loadBeaconData() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('name')) {
+        beaconState.name = params.get('name') || beaconState.name;
+        beaconState.role = params.get('role') || beaconState.role;
+        beaconState.phone = params.get('phone') || beaconState.phone;
+        beaconState.email = params.get('email') || beaconState.email;
+        beaconState.schoolId = params.get('school') || beaconState.schoolId;
+        beaconState.room = params.get('room') || beaconState.room;
+        beaconState.activity = params.get('act') || beaconState.activity;
+        beaconState.customActivityText = params.get('cust_act') || "";
+        beaconState.availability = params.get('avail') || beaconState.availability;
+        beaconState.untilTime = params.get('until') || beaconState.untilTime;
+        beaconState.nextDestination = params.get('next') || beaconState.nextDestination;
+        beaconState.note = params.get('note') || beaconState.note;
+        beaconState.updatedAt = params.get('upd') || "Just now";
+      } else {
+        const saved = localStorage.getItem('gcss_beacon_state');
+        if (saved) {
+          try {
+            beaconState = Object.assign(beaconState, JSON.parse(saved));
+          } catch(e) {
+            console.error("Error reading stored beacon state", e);
+          }
         }
+      }
+    }
 
-        function toggleDarkMode() {
-            const isDark = document.documentElement.classList.toggle('dark');
-            localStorage.setItem("district_tracker_theme", isDark ? 'dark' : 'light');
+    function saveBeaconData() {
+      localStorage.setItem('gcss_beacon_state', JSON.stringify(beaconState));
+    }
+
+    // Populate dropdown
+    function populateSchoolDropdown() {
+      const select = document.getElementById('inputSchoolId');
+      select.innerHTML = '';
+      GCSS_FACILITIES.forEach(fac => {
+        const opt = document.createElement('option');
+        opt.value = fac.id;
+        opt.textContent = `${fac.name} (${fac.category})`;
+        select.appendChild(opt);
+      });
+    }
+
+    // Format 24-hr time string "14:30" to "2:30 PM"
+    function formatTimeDisplay(timeStr) {
+      if (!timeStr) return "End of Day";
+      const parts = timeStr.split(':');
+      if (parts.length < 2) return timeStr;
+      let hours = parseInt(parts[0], 10);
+      const minutes = parts[1];
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // 0 becomes 12
+      return `${hours}:${minutes} ${ampm}`;
+    }
+
+    // Calculate time remaining relative to current local time
+    function updateTimeRemainingBadge() {
+      const badge = document.getElementById('timeRemainingBadge');
+      if (!beaconState.untilTime) {
+        badge.textContent = "Until departure";
+        return;
+      }
+      
+      const now = new Date();
+      const parts = beaconState.untilTime.split(':');
+      if (parts.length < 2) {
+        badge.textContent = "Scheduled";
+        return;
+      }
+
+      const target = new Date();
+      target.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+
+      const diffMs = target - now;
+      if (diffMs <= 0) {
+        badge.textContent = "Time concluded";
+        badge.className = "text-xs font-bold px-2 py-0.5 rounded bg-rose-200 text-rose-900 dark:bg-rose-950 dark:text-rose-300";
+      } else {
+        const diffMins = Math.round(diffMs / 60000);
+        if (diffMins < 60) {
+          badge.textContent = `~${diffMins} min left`;
+        } else {
+          const hrs = Math.floor(diffMins / 60);
+          const remMins = diffMins % 60;
+          badge.textContent = remMins > 0 ? `~${hrs}h ${remMins}m left` : `~${hrs} hr left`;
         }
+        badge.className = "text-xs font-bold px-2 py-0.5 rounded bg-amber-200/80 text-amber-900 dark:bg-amber-900/60 dark:text-amber-200";
+      }
+    }
 
-        // Load data from LocalStorage
-        function loadState() {
-            const saved = localStorage.getItem("district_tracker_data");
-            if (saved) {
-                try {
-                    state = { ...defaultState, ...JSON.parse(saved) };
-                } catch(e) {
-                    console.error("Failed to parse state", e);
-                }
-            }
+    // Render Primary Beacon Display
+    function renderBeacon() {
+      const facility = GCSS_FACILITIES.find(f => f.id === beaconState.schoolId) || GCSS_FACILITIES[0];
+      const availData = AVAILABILITY_MAP[beaconState.availability] || AVAILABILITY_MAP.AVAILABLE;
+
+      // Determine display title and icon (Preset vs Custom)
+      let activityTitle = "";
+      let activityIcon = "fa-solid fa-briefcase";
+
+      if (beaconState.activity === 'custom' || (beaconState.customActivityText && beaconState.customActivityText.trim())) {
+        activityTitle = beaconState.customActivityText && beaconState.customActivityText.trim() 
+          ? beaconState.customActivityText.trim() 
+          : "Special Assignment / On Task";
+        activityIcon = "fa-solid fa-clipboard-check";
+      } else {
+        const activityData = ACTIVITY_MAP[beaconState.activity] || ACTIVITY_MAP.walkthroughs;
+        activityTitle = activityData.title;
+        activityIcon = activityData.icon;
+      }
+
+      // 1. Staff Identity
+      document.getElementById('staffHeaderName').textContent = beaconState.name;
+      document.getElementById('staffRoleTitle').textContent = beaconState.role;
+
+      // Initials Avatar
+      const initials = (beaconState.name || 'GC')
+        .split(' ')
+        .map(w => w[0])
+        .filter(Boolean)
+        .slice(0, 2)
+        .join('')
+        .toUpperCase() || 'GC';
+      document.getElementById('avatarInitials').textContent = initials;
+      document.getElementById('lastBroadcastTime').textContent = beaconState.updatedAt || 'Recent';
+
+      // 2. What I Am Doing
+      document.getElementById('activityDisplay').textContent = activityTitle;
+      document.getElementById('activityIcon').className = activityIcon;
+      
+      const availPill = document.getElementById('availabilityPill');
+      availPill.className = `inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-0.5 rounded-full border ${availData.pillClass}`;
+      document.getElementById('availabilityText').textContent = availData.text;
+
+      // 3. How Long I Will Be Here
+      document.getElementById('untilTimeDisplay').textContent = formatTimeDisplay(beaconState.untilTime);
+      document.getElementById('nextDestinationDisplay').textContent = beaconState.nextDestination || 'Campus Office';
+      updateTimeRemainingBadge();
+
+      // 4. Where I Am (Location)
+      document.getElementById('facilityCategoryBadge').textContent = facility.category;
+      document.getElementById('specificRoomBadge').textContent = beaconState.room || 'Main Campus';
+      document.getElementById('facilityNameDisplay').textContent = facility.name;
+      document.getElementById('addressText').textContent = facility.address;
+      document.getElementById('schoolPhoneText').textContent = facility.phone;
+
+      // Note Box
+      const noteBox = document.getElementById('statusNoteBox');
+      const noteEl = document.getElementById('statusNoteText');
+      if (beaconState.note && beaconState.note.trim() !== '') {
+        noteEl.textContent = `"${beaconState.note.trim()}"`;
+        noteBox.classList.remove('hidden');
+      } else {
+        noteBox.classList.add('hidden');
+      }
+
+      // 5. Contact Buttons (Call, Text, Email)
+      const cleanPhone = (beaconState.phone || facility.phone).replace(/[^0-9]/g, '');
+      const subject = encodeURIComponent(`GCSS Inquiry: ${beaconState.name}`);
+      const emailBody = encodeURIComponent(`Hi ${beaconState.name},\n\nI scanned your GCSS location beacon. Are you currently available at ${facility.name} (${beaconState.room})?\n\nThank you!`);
+      const smsBody = encodeURIComponent(`Hi ${beaconState.name}, saw your GCSS beacon at ${facility.name} (${beaconState.room}). Are you available?`);
+
+      document.getElementById('actionCallBtn').href = `tel:${cleanPhone}`;
+      document.getElementById('actionSmsBtn').href = `sms:${cleanPhone}?&body=${smsBody}`;
+      document.getElementById('actionEmailBtn').href = `mailto:${beaconState.email}?subject=${subject}&body=${emailBody}`;
+
+      // Google maps link
+      const mapQuery = encodeURIComponent(`${facility.name}, ${facility.address}`);
+      document.getElementById('mapsDirectionsLink').href = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
+    }
+
+    // Quick helpers for Departure Time buttons in edit modal
+    function setQuickTime(minutesToAdd) {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() + minutesToAdd);
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('inputUntilTime').value = `${hh}:${mm}`;
+    }
+
+    function setEndOfDay() {
+      // GCSS school standard end of day ~3:30 PM
+      document.getElementById('inputUntilTime').value = "15:30";
+    }
+
+    // Admin Access Management
+    function handleAdminButtonClick() {
+      if (appSettings.isAdminUnlocked) {
+        openEditModal();
+      } else {
+        openPinModal();
+      }
+    }
+
+    function handleQuickEditClick() {
+      if (appSettings.isAdminUnlocked) {
+        openEditModal();
+      } else {
+        openPinModal();
+      }
+    }
+
+    function openPinModal() {
+      document.getElementById('adminPinInput').value = '';
+      document.getElementById('pinErrorMessage').classList.add('hidden');
+      document.getElementById('pinModal').classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('adminPinInput').focus();
+      }, 50);
+    }
+
+    function closePinModal() {
+      document.getElementById('pinModal').classList.add('hidden');
+    }
+
+    function verifyAdminPin(event) {
+      event.preventDefault();
+      const entered = document.getElementById('adminPinInput').value.trim();
+      const errorMsg = document.getElementById('pinErrorMessage');
+
+      if (entered === appSettings.adminPin) {
+        appSettings.isAdminUnlocked = true;
+        closePinModal();
+        updateAdminUI();
+        openEditModal();
+        showToast('Admin Mode unlocked!');
+        announceAria('Admin mode unlocked');
+      } else {
+        errorMsg.classList.remove('hidden');
+        document.getElementById('adminPinInput').select();
+        announceAria('Incorrect PIN');
+      }
+    }
+
+    function lockAdminSession() {
+      appSettings.isAdminUnlocked = false;
+      closeEditModal();
+      updateAdminUI();
+      showToast('Admin mode locked.');
+      announceAria('Admin mode locked');
+    }
+
+    function updateAdminUI() {
+      const statusBadge = document.getElementById('navAdminStatus');
+      const lockIcon = document.getElementById('navLockIcon');
+      const lockLabel = document.getElementById('navLockLabel');
+      
+      const adminBtn = document.getElementById('adminActionBtn');
+      const adminIcon = document.getElementById('adminActionIcon');
+      const adminText = document.getElementById('adminActionText');
+      const adminNoticeBar = document.getElementById('adminNoticeBar');
+
+      if (appSettings.isAdminUnlocked) {
+        statusBadge.className = "inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800";
+        lockIcon.className = "fa-solid fa-lock-open text-[10px]";
+        lockLabel.textContent = "Unlocked";
+
+        adminBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition text-xs font-bold text-white shadow";
+        adminIcon.className = "fa-solid fa-sliders";
+        adminText.textContent = "Edit Beacon";
+
+        adminNoticeBar.classList.remove('hidden');
+      } else {
+        statusBadge.className = "inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700";
+        lockIcon.className = "fa-solid fa-lock text-[10px]";
+        lockLabel.textContent = "Locked";
+
+        adminBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 transition text-xs font-bold border border-white/10 text-white";
+        adminIcon.className = "fa-solid fa-lock";
+        adminText.textContent = "Admin";
+
+        adminNoticeBar.classList.add('hidden');
+      }
+    }
+
+    // Modal controls for editing beacon
+    function openEditModal() {
+      if (!appSettings.isAdminUnlocked) {
+        openPinModal();
+        return;
+      }
+
+      // Populate current settings into form
+      document.getElementById('inputName').value = beaconState.name;
+      document.getElementById('inputRole').value = beaconState.role;
+      document.getElementById('inputPhone').value = beaconState.phone;
+      document.getElementById('inputEmail').value = beaconState.email;
+      
+      document.getElementById('inputSchoolId').value = beaconState.schoolId;
+      document.getElementById('inputRoom').value = beaconState.room;
+      
+      const activitySelect = document.getElementById('inputActivity');
+      const customActivityInput = document.getElementById('inputCustomActivity');
+      const customWrapper = document.getElementById('customActivityWrapper');
+
+      if (beaconState.activity === 'custom' || (!ACTIVITY_MAP[beaconState.activity] && beaconState.customActivityText)) {
+        activitySelect.value = 'custom';
+        customActivityInput.value = beaconState.customActivityText || '';
+        customWrapper.classList.remove('hidden');
+      } else {
+        activitySelect.value = beaconState.activity || 'walkthroughs';
+        customActivityInput.value = beaconState.customActivityText || '';
+        customWrapper.classList.add('hidden');
+      }
+
+      document.getElementById('inputAvailability').value = beaconState.availability;
+      document.getElementById('inputUntilTime').value = beaconState.untilTime || "15:00";
+      document.getElementById('inputNextDestination').value = beaconState.nextDestination || '';
+      document.getElementById('inputNote').value = beaconState.note || '';
+      document.getElementById('inputChangePin').value = '';
+
+      document.getElementById('editModal').classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('inputRoom').focus();
+      }, 50);
+    }
+
+    function handleActivitySelectChange() {
+      const select = document.getElementById('inputActivity');
+      const customWrapper = document.getElementById('customActivityWrapper');
+      const customInput = document.getElementById('inputCustomActivity');
+
+      if (select.value === 'custom') {
+        customWrapper.classList.remove('hidden');
+        customInput.focus();
+      } else {
+        customWrapper.classList.add('hidden');
+      }
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.add('hidden');
+    }
+
+    function handleFormSubmit(event) {
+      event.preventDefault();
+
+      // Read form data
+      beaconState.name = document.getElementById('inputName').value.trim();
+      beaconState.role = document.getElementById('inputRole').value.trim();
+      beaconState.phone = document.getElementById('inputPhone').value.trim();
+      beaconState.email = document.getElementById('inputEmail').value.trim();
+
+      beaconState.schoolId = document.getElementById('inputSchoolId').value;
+      beaconState.room = document.getElementById('inputRoom').value.trim();
+      
+      const selectedActivity = document.getElementById('inputActivity').value;
+      beaconState.activity = selectedActivity;
+      if (selectedActivity === 'custom') {
+        beaconState.customActivityText = document.getElementById('inputCustomActivity').value.trim();
+      } else {
+        beaconState.customActivityText = "";
+      }
+
+      beaconState.availability = document.getElementById('inputAvailability').value;
+      beaconState.untilTime = document.getElementById('inputUntilTime').value;
+      beaconState.nextDestination = document.getElementById('inputNextDestination').value.trim();
+      beaconState.note = document.getElementById('inputNote').value.trim();
+
+      const newPin = document.getElementById('inputChangePin').value.trim();
+      if (newPin.length >= 4) {
+        appSettings.adminPin = newPin;
+        localStorage.setItem('gcss_beacon_pin', newPin);
+        showToast('Admin PIN updated!');
+      }
+
+      const now = new Date();
+      beaconState.updatedAt = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+      saveBeaconData();
+      renderBeacon();
+      closeEditModal();
+      showToast('Live Beacon status updated!');
+      announceAria('Beacon status updated');
+    }
+
+    function quickSwitchFacility(schoolId) {
+      if (!appSettings.isAdminUnlocked) return;
+      beaconState.schoolId = schoolId;
+      beaconState.room = "Front Office";
+      const now = new Date();
+      beaconState.updatedAt = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      saveBeaconData();
+      renderBeacon();
+      showToast("Facility switched");
+    }
+
+    // QR Sharing logic
+    function openShareModal() {
+      const qrWrapper = document.getElementById('qrcodeWrapper');
+      qrWrapper.innerHTML = '';
+
+      document.getElementById('qrStaffLabel').textContent = `${beaconState.name} • Pulse Check`;
+
+      const shareUrl = buildShareableUrl();
+
+      new QRCode(qrWrapper, {
+        text: shareUrl,
+        width: 170,
+        height: 170,
+        colorDark: "#0B2240",
+        colorLight: "#FFFFFF",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      document.getElementById('qrModal').classList.remove('hidden');
+    }
+
+    function closeShareModal() {
+      document.getElementById('qrModal').classList.add('hidden');
+    }
+
+    function buildShareableUrl() {
+      const baseUrl = window.location.origin + window.location.pathname;
+      const params = new URLSearchParams({
+        name: beaconState.name,
+        role: beaconState.role,
+        phone: beaconState.phone,
+        email: beaconState.email,
+        school: beaconState.schoolId,
+        room: beaconState.room,
+        act: beaconState.activity,
+        cust_act: beaconState.customActivityText || '',
+        avail: beaconState.availability,
+        until: beaconState.untilTime,
+        next: beaconState.nextDestination,
+        note: beaconState.note,
+        upd: beaconState.updatedAt
+      });
+      return `${baseUrl}?${params.toString()}`;
+    }
+
+    function copyBeaconLink() {
+      const url = buildShareableUrl();
+      const tempInput = document.createElement("input");
+      tempInput.value = url;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+
+      const copyBtnText = document.getElementById('copyBtnText');
+      const orig = copyBtnText.textContent;
+      copyBtnText.textContent = "Link Copied!";
+      setTimeout(() => {
+        copyBtnText.textContent = orig;
+      }, 2500);
+
+      showToast("Shareable link copied to clipboard!");
+      announceAria("Shareable link copied to clipboard");
+    }
+
+    // Toast & Accessibility Helpers
+    function showToast(message) {
+      const toast = document.getElementById('toastNotification');
+      const msg = document.getElementById('toastMessage');
+      msg.textContent = message;
+      toast.classList.remove('opacity-0', '-translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', '-translate-y-4');
+      }, 2800);
+    }
+
+    function announceAria(message) {
+      const announcer = document.getElementById('ariaLiveAnnouncer');
+      if (announcer) {
+        announcer.textContent = message;
+      }
+    }
+
+    // Keyboard ESC listener
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (!document.getElementById('pinModal').classList.contains('hidden')) {
+          closePinModal();
+        } else if (!document.getElementById('editModal').classList.contains('hidden')) {
+          closeEditModal();
+        } else if (!document.getElementById('qrModal').classList.contains('hidden')) {
+          closeShareModal();
         }
-
-        // Save State
-        function saveState() {
-            localStorage.setItem("district_tracker_data", JSON.stringify(state));
-            renderData();
-        }
-
-        // Render UI Elements
-        function renderData() {
-            // Header
-            document.getElementById("headerName").innerText = state.name;
-            document.getElementById("headerTitle").innerText = state.dept;
-
-            // Profile Public Cards
-            document.getElementById("displayName").innerText = state.name;
-            document.getElementById("displayRole").innerText = state.role;
-            document.getElementById("displayDept").innerText = state.dept;
-            document.getElementById("displayBase").innerText = state.base;
-            document.getElementById("displayPhone").innerText = state.phone;
-            document.getElementById("displayEmail").innerText = state.email;
-
-            // Location
-            document.getElementById("displayCurrentBuilding").innerText = state.building;
-            document.getElementById("displayCurrentRoom").innerText = state.room || "N/A";
-            document.getElementById("displayNote").innerText = state.note ? `"${state.note}"` : "No extra notes.";
-            document.getElementById("noteContainer").style.display = state.note ? "flex" : "none";
-
-            // Return Time
-            const returnElem = document.getElementById("expectedReturnContainer");
-            if (state.returnTime) {
-                returnElem.classList.remove("hidden");
-                document.getElementById("displayReturnTime").innerText = state.returnTime;
-            } else {
-                returnElem.classList.add("hidden");
-            }
-
-            // Status Styling
-            const statusText = document.getElementById("statusText");
-            const statusBarBg = document.getElementById("statusBarBg");
-            statusText.innerText = state.status;
-            document.getElementById("lastUpdatedText").innerText = `Updated ${state.lastUpdated}`;
-
-            if (state.status.includes("Available")) {
-                statusBarBg.className = "bg-emerald-600 text-white px-6 py-3 flex items-center justify-between transition-colors";
-            } else if (state.status.includes("Meeting") || state.status.includes("Traveling")) {
-                statusBarBg.className = "bg-amber-500 text-white px-6 py-3 flex items-center justify-between transition-colors";
-            } else if (state.status.includes("Busy")) {
-                statusBarBg.className = "bg-rose-600 text-white px-6 py-3 flex items-center justify-between transition-colors";
-            } else {
-                statusBarBg.className = "bg-slate-600 text-white px-6 py-3 flex items-center justify-between transition-colors";
-            }
-
-            // Action Links
-            document.getElementById("smsBtn").href = `sms:${state.phone.replace(/[^0-9]/g, '')}`;
-            document.getElementById("callBtn").href = `tel:${state.phone.replace(/[^0-9]/g, '')}`;
-            document.getElementById("emailBtn").href = `mailto:${state.email}`;
-
-            // Populate Form Fields
-            document.getElementById("editStatus").value = state.status;
-            document.getElementById("editBuilding").value = state.building;
-            document.getElementById("editRoom").value = state.room;
-            document.getElementById("editReturn").value = state.returnTime;
-            document.getElementById("editNote").value = state.note;
-
-            document.getElementById("editName").value = state.name;
-            document.getElementById("editRole").value = state.role;
-            document.getElementById("editDept").value = state.dept;
-            document.getElementById("editBase").value = state.base;
-            document.getElementById("editPhone").value = state.phone;
-            document.getElementById("editEmail").value = state.email;
-            document.getElementById("editPasscode").value = state.passcode;
-        }
-
-        // Admin Login Modal Controls
-        function toggleAdminModal() {
-            if (isAdminLoggedIn) {
-                // Logout
-                isAdminLoggedIn = false;
-                document.getElementById("adminPanel").classList.add("hidden");
-                document.getElementById("adminBtnText").innerText = "Admin Login";
-            } else {
-                document.getElementById("passcodeModal").classList.remove("hidden");
-                document.getElementById("passcodeInput").value = "";
-                document.getElementById("passcodeError").classList.add("hidden");
-                document.getElementById("passcodeInput").focus();
-            }
-        }
-
-        function closePasscodeModal() {
-            document.getElementById("passcodeModal").classList.add("hidden");
-        }
-
-        function verifyPasscode() {
-            const entered = document.getElementById("passcodeInput").value;
-            if (entered === state.passcode) {
-                isAdminLoggedIn = true;
-                closePasscodeModal();
-                document.getElementById("adminPanel").classList.remove("hidden");
-                document.getElementById("adminBtnText").innerText = "Exit Admin";
-                document.getElementById("adminPanel").scrollIntoView({ behavior: 'smooth' });
-            } else {
-                document.getElementById("passcodeError").classList.remove("hidden");
-            }
-        }
-
-        // Switch Tabs in Admin
-        function switchAdminTab(tabId) {
-            ['locationTab', 'profileTab', 'qrTab'].forEach(t => {
-                const form = document.getElementById(t === 'locationTab' ? 'locationForm' : (t === 'profileTab' ? 'profileForm' : 'qrTab'));
-                const btn = document.getElementById(`tabBtn-${t}`);
-                if (t === tabId) {
-                    form.classList.remove("hidden");
-                    btn.className = "px-4 py-2 rounded-lg text-sm font-semibold bg-brand-600 text-white";
-                } else {
-                    form.classList.add("hidden");
-                    btn.className = "px-4 py-2 rounded-lg text-sm font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700";
-                }
-            });
-        }
-
-        // Save Location Update Form
-        function saveLocation(e) {
-            e.preventDefault();
-            state.status = document.getElementById("editStatus").value;
-            state.building = document.getElementById("editBuilding").value;
-            state.room = document.getElementById("editRoom").value;
-            state.returnTime = document.getElementById("editReturn").value;
-            state.note = document.getElementById("editNote").value;
-            state.lastUpdated = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            saveState();
-            alert("Location broadcast updated successfully!");
-        }
-
-        // Save Profile Form
-        function saveProfile(e) {
-            e.preventDefault();
-            state.name = document.getElementById("editName").value;
-            state.role = document.getElementById("editRole").value;
-            state.dept = document.getElementById("editDept").value;
-            state.base = document.getElementById("editBase").value;
-            state.phone = document.getElementById("editPhone").value;
-            state.email = document.getElementById("editEmail").value;
-            state.passcode = document.getElementById("editPasscode").value || "1234";
-
-            saveState();
-            alert("Profile settings saved successfully!");
-        }
-
-        // Initialize QR Code Generator
-        function initQRCode() {
-            const qrContainer = document.getElementById("qrcode");
-            qrContainer.innerHTML = "";
-            const currentUrl = window.location.href;
-            document.getElementById("qrTargetUrl").innerText = currentUrl;
-
-            new QRCode(qrContainer, {
-                text: currentUrl,
-                width: 180,
-                height: 180,
-                colorDark : "#0369a1",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
-        }
-
-        // Download QR Code Image
-        function downloadQR() {
-            const img = document.querySelector("#qrcode img");
-            if (img) {
-                const link = document.createElement("a");
-                link.href = img.src;
-                link.download = `${state.name.replace(/\s+/g, '_')}_Location_QR.png`;
-                link.click();
-            }
-        }
-    </script>
+      }
+    });
+  </script>
 </body>
 </html>
